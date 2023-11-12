@@ -21,6 +21,16 @@ class Semigroup(Protocol):
         ...
 
 
+class Monoid(Protocol):
+    def mempty(self) -> Self:  # mempty
+        ...
+
+    # To be a Monoid, the object has to be a Semigroup first, the simplest way to
+    # express this in Python is to just require this method here too.
+    def mappend(self, other: Self) -> Self:  # <>
+        ...
+
+
 class Maybe:
     def __init__(self, value):
         self._value = value
@@ -63,6 +73,12 @@ class MyList:
     def ap(self, other: Self) -> Self:  # Applicative
         return self.__class__([x(y) for x in self._list for y in other._list])
 
+    def mappend(self, other: Self) -> Self:  # semigroup
+        return self.__class__(self._list + other._list)
+
+    def mempty(self) -> Self:  # monoid
+        return self.__class__([])
+
 
 class OneTwoMany(Enum):
     ONE = auto()
@@ -97,6 +113,13 @@ def mappend(x: Semigroup, y: Semigroup) -> Semigroup:
     return x.mappend(y)
 
 
+def mconcat(mylist_of_monoids: MyList) -> Monoid:
+    result = mylist_of_monoids.mempty()  # TODO: This should be mempty of its content
+    for item in mylist_of_monoids:
+        result = result.mappend(item)
+    return result
+
+
 if __name__ == "__main__":
     # functor examples
     print(square(Maybe(None)))  # Maybe(None)
@@ -118,3 +141,9 @@ if __name__ == "__main__":
     print(mappend(OneTwoMany.ONE, OneTwoMany.ONE))  # OneTwoMany.TWO
     print(mappend(OneTwoMany.ONE, OneTwoMany.TWO))  # OneTwoMany.MANY
     print(mappend(OneTwoMany.ONE, OneTwoMany.MANY))  # OneTwoMany.MANY
+
+    # monoid examples
+    print(mconcat(MyList([])))  # MyList([])
+    print(
+        mconcat(MyList([MyList([1, 2, 3]), MyList([4, 5, 6])]))
+    )  # MyList([1, 2, 3, 4, 5, 6])
