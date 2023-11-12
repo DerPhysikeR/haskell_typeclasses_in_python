@@ -113,12 +113,10 @@ class OneTwoMany(Enum):
         return self.__class__(self.MANY)
 
 
-# function which requires an instance of Functor
 def square(arg: Functor) -> Functor:
     return arg.fmap(lambda x: x * x)
 
 
-# function which requires an instance of Applicative
 def ap_sum(x: Applicative, y: Applicative) -> Applicative:
     # In Haskell, functions support partial application by default, to simulate that
     # we split a two argument function into two single argument functions
