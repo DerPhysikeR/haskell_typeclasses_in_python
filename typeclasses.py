@@ -1,3 +1,4 @@
+from enum import Enum, auto
 from typing import Callable, Iterator, Protocol, Self
 
 
@@ -12,6 +13,11 @@ class Applicative(Protocol):
         ...
 
     def ap(self, other: Self) -> Self:  # <*>
+        ...
+
+
+class Semigroup(Protocol):
+    def mappend(self, other: Self) -> Self:  # <>
         ...
 
 
@@ -58,6 +64,17 @@ class MyList:
         return self.__class__([x(y) for x in self._list for y in other._list])
 
 
+class OneTwoMany(Enum):
+    ONE = auto()
+    TWO = auto()
+    MANY = auto()
+
+    def mappend(self, other: Self) -> Self:
+        if self == self.ONE and other == self.ONE:
+            return self.__class__(self.TWO)
+        return self.__class__(self.MANY)
+
+
 # function which requires an instance of Functor
 def square(arg: Functor) -> Functor:
     return arg.fmap(lambda x: x * x)
@@ -76,6 +93,10 @@ def ap_sum(x: Applicative, y: Applicative) -> Applicative:
     return x.pure(add).ap(x).ap(y)
 
 
+def mappend(x: Semigroup, y: Semigroup) -> Semigroup:
+    return x.mappend(y)
+
+
 if __name__ == "__main__":
     # functor examples
     print(square(Maybe(None)))  # Maybe(None)
@@ -92,3 +113,8 @@ if __name__ == "__main__":
     print(
         ap_sum(MyList([1, 2, 3]), MyList([4, 5, 6]))
     )  # MyList([5, 6, 7, 6, 7, 8, 7, 8, 9])
+
+    # semigroup examples
+    print(mappend(OneTwoMany.ONE, OneTwoMany.ONE))  # OneTwoMany.TWO
+    print(mappend(OneTwoMany.ONE, OneTwoMany.TWO))  # OneTwoMany.MANY
+    print(mappend(OneTwoMany.ONE, OneTwoMany.MANY))  # OneTwoMany.MANY
