@@ -65,10 +65,10 @@ class Maybe:
         return self.__class__(self._value(other._value))
 
     @classmethod
-    def return_(cls, value: Any) -> Self:
+    def return_(cls, value: Any) -> Self:  # Monad
         return cls(value)
 
-    def bind(self, fun: Callable) -> Self:
+    def bind(self, fun: Callable) -> Self:  # Monad
         if self._value is None:
             return self.__class__(None)
         return fun(self._value)
@@ -94,11 +94,11 @@ class MyList:
     def ap(self, other: Self) -> Self:  # Applicative
         return self.__class__([x(y) for x in self._list for y in other._list])
 
-    def mappend(self, other: Self) -> Self:  # semigroup
+    def mappend(self, other: Self) -> Self:  # Semigroup
         return self.__class__(self._list + other._list)
 
     @classmethod
-    def mempty(cls) -> Self:  # monoid
+    def mempty(cls) -> Self:  # Monoid
         return cls([])
 
 
