@@ -1,5 +1,5 @@
 from enum import Enum, auto
-from typing import Callable, Iterator, Protocol, Self
+from typing import Any, Callable, Iterator, Protocol, Self
 
 
 class Functor(Protocol):
@@ -32,6 +32,17 @@ class Monoid(Protocol):
         ...
 
 
+class Monad(Protocol):
+    def bind(self, fun: Callable) -> Self:  # >>=
+        ...
+
+    # def then_(self, other: Self) -> Self: # >>
+    #     ...
+
+    def return_(self, something: Any) -> Self:  # return
+        ...
+
+
 class Maybe:
     def __init__(self, value):
         self._value = value
@@ -52,6 +63,15 @@ class Maybe:
         if self._value is None or other._value is None:
             return self.__class__(None)
         return self.__class__(self._value(other._value))
+
+    @classmethod
+    def return_(cls, value: Any) -> Self:
+        return cls(value)
+
+    def bind(self, fun: Callable) -> Self:
+        if self._value is None:
+            return self.__class__(None)
+        return fun(self._value)
 
 
 class MyList:
@@ -122,6 +142,12 @@ def mconcat(mylist_of_monoids: MyList) -> Monoid:
     return result
 
 
+def divide_twelve_by(x) -> Maybe:
+    if x == 0:
+        return Maybe(None)
+    return Maybe(12 / x)
+
+
 if __name__ == "__main__":
     # functor examples
     print(square(Maybe(None)))  # Maybe(None)
@@ -149,3 +175,10 @@ if __name__ == "__main__":
     print(
         mconcat(MyList([MyList([1, 2, 3]), MyList([4, 5, 6])]))
     )  # MyList([1, 2, 3, 4, 5, 6])
+
+    # monad examples
+    print(Maybe(None).bind(divide_twelve_by))  # Maybe(None)
+    print(Maybe(0).bind(divide_twelve_by))  # Maybe(None)
+    print(Maybe(2).bind(divide_twelve_by))  # Maybe(6.0)
+    print(Maybe(2).bind(divide_twelve_by).bind(divide_twelve_by))  # Maybe(2.0)
+    print(Maybe.return_(2).bind(divide_twelve_by).bind(divide_twelve_by))  # Maybe(2.0)
