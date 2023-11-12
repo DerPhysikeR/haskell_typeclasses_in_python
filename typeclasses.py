@@ -22,7 +22,8 @@ class Semigroup(Protocol):
 
 
 class Monoid(Protocol):
-    def mempty(self) -> Self:  # mempty
+    @classmethod
+    def mempty(cls) -> Self:  # mempty
         ...
 
     # To be a Monoid, the object has to be a Semigroup first, the simplest way to
@@ -76,8 +77,9 @@ class MyList:
     def mappend(self, other: Self) -> Self:  # semigroup
         return self.__class__(self._list + other._list)
 
-    def mempty(self) -> Self:  # monoid
-        return self.__class__([])
+    @classmethod
+    def mempty(cls) -> Self:  # monoid
+        return cls([])
 
 
 class OneTwoMany(Enum):
