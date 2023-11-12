@@ -28,16 +28,16 @@ class Maybe:
     def __repr__(self) -> str:
         return f"Maybe({repr(self._value)})"
 
-    def fmap(self, fun: Callable) -> Self:
+    def fmap(self, fun: Callable) -> Self:  # Functor
         if self._value is None:
             return self.__class__(None)
         return self.__class__(fun(self._value))
 
     @classmethod
-    def pure(cls, fun: Callable) -> Self:
+    def pure(cls, fun: Callable) -> Self:  # Applicative
         return cls(fun)
 
-    def ap(self, other: Self) -> Self:
+    def ap(self, other: Self) -> Self:  # Applicative
         if self._value is None or other._value is None:
             return self.__class__(None)
         return self.__class__(self._value(other._value))
@@ -53,14 +53,14 @@ class MyList:
     def __iter__(self) -> Iterator:
         return iter(self._list)
 
-    def fmap(self, fun: Callable) -> Self:
+    def fmap(self, fun: Callable) -> Self:  # Functor
         return self.__class__(list(map(fun, self._list)))
 
     @classmethod
-    def pure(cls, fun: Callable) -> Self:  # applicative
+    def pure(cls, fun: Callable) -> Self:  # Applicative
         return cls([fun])
 
-    def ap(self, other: Self) -> Self:  # applicative
+    def ap(self, other: Self) -> Self:  # Applicative
         return self.__class__([x(y) for x in self._list for y in other._list])
 
 
@@ -69,7 +69,7 @@ class OneTwoMany(Enum):
     TWO = auto()
     MANY = auto()
 
-    def mappend(self, other: Self) -> Self:
+    def mappend(self, other: Self) -> Self:  # Semigroup
         if self == self.ONE and other == self.ONE:
             return self.__class__(self.TWO)
         return self.__class__(self.MANY)
